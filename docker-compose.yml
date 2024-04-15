@@ -1,0 +1,46 @@
+version: '3'
+services:
+  user-mysql:
+    container_name: "user-mysql" # spring 설정에 database-url을 해당 container 이름으로 해야한다
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: userDB
+    volumes:
+      - ./sql/user/:/docker-entrypoint-initdb.d/
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  product-mysql:
+    container_name: "product-mysql" # spring 설정에 database-url을 해당 container 이름으로 해야한다
+    image: mysql:8.0
+    ports:
+      - "13307:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: productDB
+    volumes:
+      - ./sql/product/:/docker-entrypoint-initdb.d/
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  order-mysql:
+    container_name: "order-mysql" # spring 설정에 database-url을 해당 container 이름으로 해야한다
+    image: mysql:8.0
+    ports:
+      - "13308:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: orderDB
+    volumes:
+      - ./sql/order/:/docker-entrypoint-initdb.d/
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci

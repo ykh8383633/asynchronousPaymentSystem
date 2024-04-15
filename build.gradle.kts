@@ -5,7 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4" apply false
 	kotlin("jvm") version "1.9.23"
 	kotlin("plugin.spring") version "1.9.23" apply false
-	//kotlin("plugin.jpa") version "1.9.23" apply false
+	kotlin("plugin.jpa") version "1.9.23" apply false
 }
 
 allprojects {
@@ -22,12 +22,12 @@ subprojects {
 	apply(plugin = "org.springframework.boot")
 	apply(plugin = "io.spring.dependency-management")
 	apply(plugin = "org.jetbrains.kotlin.plugin.spring")
-	//apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
+	apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
 	apply(plugin = "kotlin")
 	apply(plugin = "kotlin-kapt")
 
 	dependencies {
-		//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+		implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 		implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 		implementation("org.jetbrains.kotlin:kotlin-reflect")
 		annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
