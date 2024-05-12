@@ -4,6 +4,20 @@ server:
 spring:
   application:
     name: paymentApi
+  profiles:
+    include: datasource
+    group:
+      dev: "datasource-dev"
+    active: dev
+
+  jpa:
+    database: mysql
+    show-sql: true
+    generate-ddl: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: true
 
   jackson:
     property-naming-strategy: SNAKE_CASE

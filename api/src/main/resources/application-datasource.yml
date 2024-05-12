@@ -1,0 +1,30 @@
+spring:
+  config:
+    activate:
+      on-profile: datasource-dev
+
+  datasource:
+    user:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:13306/userDB
+      username: root
+      password: 1234
+    product:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:13307/productDB
+      username: root
+      password: 1234
+    order:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:13308/orderDB
+      username: root
+      password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+    open-in-view: false
