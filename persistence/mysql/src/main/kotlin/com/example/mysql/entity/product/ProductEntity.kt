@@ -1,5 +1,7 @@
 package com.example.mysql.entity.product
 
+import com.example.domain.model.product.Product
+import com.example.mysql.entity.DomainEntity
 import jakarta.persistence.*
 import java.time.Instant
 import java.util.*
@@ -7,15 +9,15 @@ import java.util.*
 
 @Table(name = "products")
 @Entity
-class ProductEntity {
+class ProductEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null;
-    var name: String? = null;
-    var price: Long? = null
-    var createdDt: Instant? = null
-    var updatedDt: Instant? = null
-
+    var id: Long? = null,
+    var name: String? = null,
+    var price: Long? = null,
+    var createdDt: Instant? = null,
+    var updatedDt: Instant? = null,
+): DomainEntity<Product, ProductEntity> {
     @PrePersist
     fun prePersist() {
         if(Objects.isNull(createdDt)){
@@ -32,5 +34,25 @@ class ProductEntity {
         if(Objects.isNull(updatedDt)){
             updatedDt = Instant.now()
         }
+    }
+
+    companion object {
+        fun of(domain: Product): ProductEntity = ProductEntity(
+            id = domain.id,
+            name = domain.name,
+            price = domain.price,
+            createdDt = domain.createdDt,
+            updatedDt = domain.updatedDt
+        )
+    }
+
+    override fun toDomain(): Product {
+        return Product (
+            id = id,
+            name = name,
+            price = price,
+            createdDt = createdDt,
+            updatedDt = updatedDt
+        )
     }
 }
