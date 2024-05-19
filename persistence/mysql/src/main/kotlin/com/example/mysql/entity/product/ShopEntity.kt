@@ -1,24 +1,21 @@
 package com.example.mysql.entity.product
 
-import com.example.domain.model.product.Product
+import com.example.domain.model.product.Shop
 import com.example.mysql.entity.DomainEntity
 import jakarta.persistence.*
 import java.time.Instant
 import java.util.*
 
-
-@Table(name = "products")
+@Table(name = "shops")
 @Entity
-class ProductEntity(
+class ShopEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
     var name: String? = null,
-    var shopId: Long? = null,
-    var price: Long? = null,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
-): DomainEntity<Product, ProductEntity> {
+): DomainEntity<Shop, ShopEntity> {
     @PrePersist
     fun prePersist() {
         if(Objects.isNull(createdDt)){
@@ -38,24 +35,22 @@ class ProductEntity(
     }
 
     companion object {
-        fun of(domain: Product): ProductEntity = ProductEntity(
-            id = domain.id,
-            name = domain.name,
-            price = domain.price,
-            shopId = domain.shopId,
-            createdDt = domain.createdDt,
-            updatedDt = domain.updatedDt
-        )
+        fun of(domain: Shop): ShopEntity {
+            return ShopEntity(
+                id = domain.id,
+                name = domain.name,
+                createdDt = domain.createdDt,
+                updatedDt = domain.updatedDt
+            )
+        }
     }
 
-    override fun toDomain(): Product {
-        return Product (
+    override fun toDomain(): Shop {
+        return Shop(
             id = id,
             name = name,
-            price = price,
-            shopId = shopId,
             createdDt = createdDt,
-            updatedDt = updatedDt,
+            updatedDt = updatedDt
         )
     }
 }

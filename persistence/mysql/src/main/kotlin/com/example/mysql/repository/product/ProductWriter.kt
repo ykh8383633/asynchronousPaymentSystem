@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class ProductWriter(
     private val repository: ProductRepository
 ) {
-    fun save(product: Product) {
-        val entity = ProductEntity.of(product)
-        repository.save(entity)
+    fun save(product: Product): Product {
+        val entity = repository.save(ProductEntity.of(product))
+        return entity.toDomain()
     }
 }

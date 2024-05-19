@@ -20,4 +20,9 @@ class ProductReader(
             .toMutableList()
     }
 
+    fun findByNameAndShopId(name: String, shopId: Long): Product? {
+        val entity =  repository.findByNameAndShopId(name, shopId) ?: return null
+        return entity.toDomain()
+    }
+
 }
