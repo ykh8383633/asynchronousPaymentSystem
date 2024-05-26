@@ -13,7 +13,6 @@ class ProductService(
     private val productReader: ProductReader,
     private val productWriter: ProductWriter
 ) {
-
     fun getAllProducts(): MutableList<Product> = productReader.findAll()
     @Transactional(value = "productTransactionManager")
     fun saveProduct(saveProductRequestDto: SaveProductRequestDto): SaveProductResponseDto {
@@ -21,7 +20,11 @@ class ProductService(
         if(productReader.findByNameAndShopId(saveProductRequestDto.name!!, saveProductRequestDto.shopId!!) != null) {
             throw Exception("PRODUCT_ALREADY_EXIST")
         }
-        val product = productWriter.save(Product.of(saveProductRequestDto))
+        val product = productWriter.save(saveProductRequestDto.toProduct())
         return SaveProductResponseDto.of(product, true)
+    }
+
+    fun findById(id: Long): Product? {
+        return productReader.findById((id));
     }
 }

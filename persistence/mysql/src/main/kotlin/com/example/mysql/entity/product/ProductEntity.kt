@@ -13,9 +13,9 @@ class ProductEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-    var name: String? = null,
-    var shopId: Long? = null,
-    var price: Long? = null,
+    var name: String,
+    var shopId: Long,
+    var price: Long,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ): DomainEntity<Product, ProductEntity> {

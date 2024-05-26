@@ -1,6 +1,6 @@
 package com.example.asynchronousPaymentSystem.controller
 
-import com.example.domain.dto.PurchaseRequestDto
+import com.example.domain.dto.OrderRequestDto
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.RestController
 class OrderController() {
 
     @PostMapping
-    fun purchase(@RequestBody purchaseRequestDto: PurchaseRequestDto){}
+    fun order(@RequestBody purchaseRequestDto: OrderRequestDto){}
 }

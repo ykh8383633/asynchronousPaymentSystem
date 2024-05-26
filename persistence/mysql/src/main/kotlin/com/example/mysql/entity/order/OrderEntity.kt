@@ -19,11 +19,11 @@ class OrderEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-    var userId: Long? = null,
-    var productId: Long? = null,
-    var quantity: Int? = null,
-    var status: OrderStatus? = null,
-    var price: Long? = null,
+    var userId: Long,
+    var productId: Long,
+    var quantity: Int,
+    var status: OrderStatus,
+    var price: Long,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ): DomainEntity<Order, OrderEntity> {
