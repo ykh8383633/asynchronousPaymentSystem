@@ -1,9 +1,9 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
-    name: paymentApi
+    name: paymentConsumer
   profiles:
     include: datasource, message
     group:
@@ -21,3 +21,9 @@ spring:
 
   jackson:
     property-naming-strategy: SNAKE_CASE
+
+  kafka:
+    consumer:
+      groupId: 1
+      subscribes:
+        - "topic:confirm-order"
