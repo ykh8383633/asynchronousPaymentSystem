@@ -13,7 +13,8 @@ class ProducerImpl(
 
     override fun send(topic: Topic, value: Message): CompletableFuture<Boolean> {
         val topicName = topic.name
-        return template.send(topicName ,value).exceptionallyAsync { null }
+        return template.send(topicName ,value)
+            .exceptionallyAsync { null }
             .thenApplyAsync {it != null}
     }
 }

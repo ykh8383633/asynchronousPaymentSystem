@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component
 class ConfirmOrder(
     private val messageProperties: MessageProperties
 ): Topic {
-    override val name: String = messageProperties.topic.confirmOrder
+    override val name: String = messageProperties.topics.confirmOrder
 }

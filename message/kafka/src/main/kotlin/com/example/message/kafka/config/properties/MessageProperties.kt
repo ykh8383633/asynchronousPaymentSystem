@@ -5,11 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "spring.kafka")
 class MessageProperties(
     val bootstrapServer: String,
-    val topic: TopicProperties,
-    val consumer: ConsumerProperties
+    val topics: TopicProperties,
+    val consumer: ConsumerProperties?
 ) {
     data class ConsumerProperties(
-        val groupId: String,
+        val groupId: String?,
         val subscribes: MutableList<String>
     )
 

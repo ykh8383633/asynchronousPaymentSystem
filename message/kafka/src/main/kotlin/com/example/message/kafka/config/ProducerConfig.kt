@@ -1,8 +1,10 @@
 package com.example.message.kafka.config
 
+import com.example.domain.model.message.Message
 import com.example.message.kafka.config.properties.MessageProperties
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -11,6 +13,7 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
+@EnableConfigurationProperties(MessageProperties::class)
 class ProducerConfig(
     private val properties: MessageProperties
 ) {
@@ -20,7 +23,7 @@ class ProducerConfig(
         val config = mapOf<String, Any>(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to properties.bootstrapServer,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java,
         )
 
         return DefaultKafkaProducerFactory(config)

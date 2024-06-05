@@ -9,6 +9,7 @@ import com.example.mysql.repository.order.OrderWriter
 import com.example.message.kafka.producer.Producer
 import com.example.message.kafka.topic.ConfirmOrder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OrderService(
@@ -18,7 +19,8 @@ class OrderService(
     private val producer: Producer,
     private val confirmOrder: ConfirmOrder
 ) {
-    fun order(orderRequestDto: OrderRequestDto) {
+    @Transactional(value = "orderTransactionManager")
+    fun order(orderRequestDto: OrderRequestDto): Order {
         val product = productService.findById(orderRequestDto.productId) ?: throw Exception("INVALID_PRODUCT")
         val price = orderRequestDto.quantity * product.price
         val order = Order(
@@ -33,5 +35,7 @@ class OrderService(
 
         val message = ConfirmOrderMessage(saved)
         producer.send(confirmOrder, message)
+
+        return saved
     }
 }

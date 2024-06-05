@@ -1,9 +1,9 @@
 spring:
   config:
     activate:
-      on-profile: message_dev
+      on-profile: message-dev
 
   kafka:
     bootstrapServer: 127.0.0.1:9093
     topics:
-      confirmOrder: "topic:confirm-order"
+      confirmOrder: "topic-confirm-order"

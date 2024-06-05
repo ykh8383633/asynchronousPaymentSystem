@@ -23,7 +23,8 @@ spring:
     property-naming-strategy: SNAKE_CASE
 
   kafka:
+    isConsumer: true
     consumer:
       groupId: 1
       subscribes:
-        - "topic:confirm-order"
+        - "topic-confirm-order"

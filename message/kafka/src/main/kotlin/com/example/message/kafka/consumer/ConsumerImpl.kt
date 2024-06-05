@@ -3,8 +3,6 @@ package com.example.message.kafka.consumer
 import com.example.message.kafka.config.properties.MessageProperties
 import com.example.message.kafka.consumer.handler.MessageHandler
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.listener.MessageListener
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,7 +22,7 @@ class ConsumerImpl(
     override fun onMessage(record: ConsumerRecord<String, Any>) {
         val topic = record.topic()
         val value = record.value()
-        val handlers = handlerMap.get(topic)
+        val handlers = handlerMap[topic]
 
         handlers?.forEach { it.handle(value) }
     }
