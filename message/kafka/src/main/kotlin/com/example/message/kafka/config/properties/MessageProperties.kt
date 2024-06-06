@@ -14,6 +14,6 @@ class MessageProperties(
     )
 
     data class TopicProperties(
-        val confirmOrder: String
+        val requestOrder: String
     )
 }

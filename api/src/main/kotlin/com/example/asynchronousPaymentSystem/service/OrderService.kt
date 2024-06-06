@@ -2,12 +2,12 @@ package com.example.asynchronousPaymentSystem.service
 
 import com.example.domain.dto.OrderRequestDto
 import com.example.domain.enums.OrderStatus
-import com.example.domain.model.message.ConfirmOrderMessage
+import com.example.domain.model.message.RequestOrderMessage
 import com.example.domain.model.order.Order
-import com.example.mysql.repository.order.OrderReader
 import com.example.mysql.repository.order.OrderWriter
 import com.example.message.kafka.producer.Producer
-import com.example.message.kafka.topic.ConfirmOrder
+import com.example.message.kafka.topic.RequestOrder
+import com.example.mysql.repository.orderimport.OrderReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,7 +17,7 @@ class OrderService(
     private val orderWriter: OrderWriter,
     private val productService: ProductService,
     private val producer: Producer,
-    private val confirmOrder: ConfirmOrder
+    private val requestOrder: RequestOrder
 ) {
     @Transactional(value = "orderTransactionManager")
     fun order(orderRequestDto: OrderRequestDto): Order {
@@ -33,9 +33,11 @@ class OrderService(
 
         val saved = orderWriter.save(order)
 
-        val message = ConfirmOrderMessage(saved)
-        producer.send(confirmOrder, message)
+        val message = RequestOrderMessage(saved)
+        producer.send(requestOrder, message)
 
         return saved
     }
+
+    fun findAll(): MutableList<Order> = orderReader.findAll()
 }
