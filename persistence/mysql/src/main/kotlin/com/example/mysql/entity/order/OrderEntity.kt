@@ -3,13 +3,7 @@ package com.example.mysql.entity.order
 import com.example.domain.enums.OrderStatus
 import com.example.domain.model.order.Order
 import com.example.mysql.entity.DomainEntity
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.PrePersist
-import jakarta.persistence.PreUpdate
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.Instant
 import java.util.*
 
@@ -22,6 +16,7 @@ class OrderEntity(
     var userId: Long,
     var productId: Long,
     var quantity: Int,
+    @Enumerated(value = EnumType.STRING)
     var status: OrderStatus,
     var price: Long,
     var createdDt: Instant? = null,

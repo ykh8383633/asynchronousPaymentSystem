@@ -27,4 +27,6 @@ spring:
     consumer:
       groupId: 1
       subscribes:
-        - "topic-request-order"
+        - "command-request-order"
+        - "event-reject-order"
+        - "event-confirm-order"
