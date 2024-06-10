@@ -1,5 +1,9 @@
 package com.example.domain.model.message
 
+import com.example.domain.model.order.Order
+
 data class ConfirmOrderMessage(
-    val orderId: Long
+    val order: Order,
+    val paymentId: String,
+    val amount: Long
 ): Message

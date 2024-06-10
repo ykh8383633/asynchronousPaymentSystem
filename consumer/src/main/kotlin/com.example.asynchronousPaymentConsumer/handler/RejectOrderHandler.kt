@@ -15,7 +15,7 @@ class RejectOrderHandler(
 ): GenericMessageHandlerBase<RejectOrderMessage>() {
 
     override fun handleMessage(data: RejectOrderMessage) {
-        val order = orderService.findById(data.orderId) ?: throw Exception("ORDER NOT FOUND")
+        val order = data.order
 
         order.status = OrderStatus.REJECTED
         orderService.update(order)

@@ -23,6 +23,12 @@ class OrderService(
     fun order(orderRequestDto: OrderRequestDto): Order {
         val product = productService.findById(orderRequestDto.productId) ?: throw Exception("INVALID_PRODUCT")
         val price = orderRequestDto.quantity * product.price
+
+        if(price != orderRequestDto.amount) {
+            // produce reject order topic?
+            throw Exception("INVALID AMOUNT")
+        }
+
         val order = Order(
             productId = orderRequestDto.productId,
             userId = orderRequestDto.userId,
@@ -33,7 +39,15 @@ class OrderService(
 
         val saved = orderWriter.save(order)
 
-        val message = RequestOrderMessage(saved)
+        val message = RequestOrderMessage(
+            orderId = saved.id !!,
+            quantity = saved.quantity,
+            productId = saved.productId,
+            userId = saved.userId,
+            paymentId = orderRequestDto.paymentId,
+            amount = orderRequestDto.amount
+        )
+
         producer.send(requestOrder, message)
 
         return saved

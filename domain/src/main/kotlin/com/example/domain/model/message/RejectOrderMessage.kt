@@ -1,8 +1,9 @@
 package com.example.domain.model.message
 
 import com.example.domain.enums.OrderRejectedReason
+import com.example.domain.model.order.Order
 
 data class RejectOrderMessage(
-    val orderId: Long,
+    val order: Order,
     val rejectedReason: OrderRejectedReason
 ): Message

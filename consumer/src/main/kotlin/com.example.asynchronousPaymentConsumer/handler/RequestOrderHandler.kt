@@ -27,7 +27,7 @@ class RequestOrderHandler(
     private val confirmOrderTopic: ConfirmOrder
 ): GenericMessageHandlerBase<RequestOrderMessage>() {
     override fun handleMessage(data: RequestOrderMessage) {
-        val orderID = data.order.id ?: throw Exception("ORDER ID CAN NOT BE NULL")
+        val orderID = data.orderId
         val order: Order = orderService.findById(orderID) ?: throw  Exception("ORDER NOT FOUND")
         val rejectOrderMessage = validateOrder(order)
         if(rejectOrderMessage != null){
@@ -35,15 +35,15 @@ class RequestOrderHandler(
             return;
         }
 
-        producer.send(confirmOrderTopic, ConfirmOrderMessage(order.id !!))
+        producer.send(confirmOrderTopic, ConfirmOrderMessage(order, data.paymentId, data.amount))
     }
 
     private fun validateOrder(order: Order): RejectOrderMessage? {
         val inventory = inventoryService.findByProductId(order.productId)
-            ?: return RejectOrderMessage(order.id !!, OrderRejectedReason.INVALID_ORDER_ID)
+            ?: return RejectOrderMessage(order, OrderRejectedReason.INVALID_ORDER_ID)
 
         if((inventory.quantity ?: 0) < order.quantity){
-            return RejectOrderMessage(order.id !!, OrderRejectedReason.NOT_ENOUGH_QUANTITY)
+            return RejectOrderMessage(order, OrderRejectedReason.NOT_ENOUGH_QUANTITY)
         }
 
         return null

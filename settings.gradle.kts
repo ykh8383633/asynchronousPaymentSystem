@@ -8,3 +8,4 @@ include("message")
 include("message:kafka")
 findProject(":message:kafka")?.name = "kafka"
 include("consumer")
+include("common")
