@@ -21,12 +21,10 @@ class OrderService(
 ) {
     @Transactional(value = "orderTransactionManager")
     fun order(orderRequestDto: OrderRequestDto): Order {
-        val product = productService.findById(orderRequestDto.productId) ?: throw Exception("INVALID_PRODUCT")
-        val price = orderRequestDto.quantity * product.price
+        val price = this.calcPrice(orderRequestDto)
 
-        if(price != orderRequestDto.amount) {
-            // produce reject order topic?
-            throw Exception("INVALID AMOUNT")
+        if(price != orderRequestDto.amount){
+            throw Exception("AMOUNT IS NOT CORRECT")
         }
 
         val order = Order(
@@ -51,6 +49,11 @@ class OrderService(
         producer.send(requestOrder, message)
 
         return saved
+    }
+
+    private fun calcPrice(orderRequest: OrderRequestDto): Long{
+        val product = productService.findById(orderRequest.productId) ?: throw Exception("PRODUCT NOT FOUND");
+        return product.price * orderRequest.quantity
     }
 
     fun findAll(): MutableList<Order> = orderReader.findAll()

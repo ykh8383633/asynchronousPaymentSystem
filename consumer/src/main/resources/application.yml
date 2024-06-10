@@ -30,3 +30,7 @@ spring:
         - "command-request-order"
         - "event-reject-order"
         - "event-confirm-order"
+
+  payment:
+    secretKey: "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"
+    confirmPaymentUrl: "https://api.tosspayments.com/v1/payments/confirm"
