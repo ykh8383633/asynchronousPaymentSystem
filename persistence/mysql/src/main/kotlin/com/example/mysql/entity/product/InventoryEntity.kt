@@ -13,7 +13,7 @@ class InventoryEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
     var productId: Long? = null,
-    var quantity: Int? = null,
+    var quantity: Long? = null,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ): DomainEntity<Inventory, InventoryEntity> {

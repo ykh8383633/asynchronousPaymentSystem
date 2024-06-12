@@ -1,5 +1,6 @@
 package com.example.mysql.entity.payment
 
+import com.example.domain.enums.PaymentStatus
 import com.example.domain.model.payment.Payment
 import com.example.mysql.entity.DomainEntity
 import jakarta.persistence.*
@@ -12,9 +13,13 @@ class PaymentEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
+    var pgOrderId: String? = null,
+    var pgPaymentId: String? = null,
+    var reason: String? = null,
     var orderId: Long? = null,
     var userId: Long? = null,
-    var status: String? = null,
+    @Enumerated(value = EnumType.STRING)
+    var status: PaymentStatus? = null,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ): DomainEntity<Payment, PaymentEntity> {
@@ -41,6 +46,9 @@ class PaymentEntity(
             id = domain.id,
             orderId = domain.orderId,
             userId =  domain.orderId,
+            pgPaymentId = domain.pgPaymentId,
+            pgOrderId = domain.pgOrderId,
+            reason = domain.reason,
             status = domain.status,
             createdDt = domain.createdDt,
             updatedDt = domain.updatedDt
@@ -52,6 +60,9 @@ class PaymentEntity(
             id = id,
             orderId = orderId,
             userId = userId,
+            pgPaymentId = pgPaymentId,
+            pgOrderId = pgOrderId,
+            reason = reason,
             status = status,
             createdDt = createdDt,
             updatedDt = updatedDt

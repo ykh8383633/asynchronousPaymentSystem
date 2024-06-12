@@ -8,5 +8,6 @@ data class RequestOrderMessage(
     val productId: Long,
     val userId: Long,
     val paymentId: String,
+    val paymentOrderId: String,
     val amount: Long
 ): Message

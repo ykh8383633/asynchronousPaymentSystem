@@ -11,4 +11,8 @@ class InventoryWriter(
     fun save(inventory: Inventory): Inventory {
         return repository.save(InventoryEntity.of(inventory)).toDomain()
     }
+
+    fun update(inventory: Inventory): Inventory {
+        return repository.save(InventoryEntity.of(inventory)).toDomain()
+    }
 }

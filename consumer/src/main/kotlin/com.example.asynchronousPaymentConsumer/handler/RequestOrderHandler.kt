@@ -35,7 +35,7 @@ class RequestOrderHandler(
             return;
         }
 
-        producer.send(confirmOrderTopic, ConfirmOrderMessage(order, data.paymentId, data.amount))
+        producer.send(confirmOrderTopic, ConfirmOrderMessage(order, data.paymentId, data.paymentOrderId, data.amount))
     }
 
     private fun validateOrder(order: Order): RejectOrderMessage? {

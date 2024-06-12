@@ -3,8 +3,12 @@ package com.example.asynchronousPaymentSystem.controller
 import com.example.asynchronousPaymentSystem.service.ProductService
 import com.example.domain.dto.SaveProductRequestDto
 import com.example.domain.dto.SaveProductResponseDto
+import com.example.domain.dto.StockRequestDto
+import com.example.domain.dto.StockResponseDto
 import com.example.domain.model.product.Product
 import com.example.mysql.entity.product.ProductEntity
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -26,5 +30,7 @@ class ProductController(
     fun saveProduct(@RequestBody saveProductRequest: SaveProductRequestDto): SaveProductResponseDto {
         return productService.saveProduct(saveProductRequest)
     }
+
+
 
 }

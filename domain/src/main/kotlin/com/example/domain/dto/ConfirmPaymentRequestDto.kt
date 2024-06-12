@@ -1,7 +1,10 @@
 package com.example.domain.dto
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class ConfirmPaymentRequestDto(
-    val paymentId: String,
-    val amount: Long,
-    val orderId: Long
+    @JsonProperty("paymentKey") val paymentKey: String,
+    @JsonProperty("amount") val amount: String,
+    @JsonProperty("orderId") val orderId: String
 )

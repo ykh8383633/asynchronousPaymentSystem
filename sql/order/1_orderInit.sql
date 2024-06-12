@@ -13,6 +13,9 @@ create table `orders` (
 
 create table `payment` (
     `id`            bigint NOT NULL AUTO_INCREMENT,
+    `pg_order_id`   varchar(50),
+    `pg_payment_id` varchar(50),
+    `reason`        varchar(1000),
     `order_id`      bigint,
     `user_id`       bigint,
     `status`        varchar(50),

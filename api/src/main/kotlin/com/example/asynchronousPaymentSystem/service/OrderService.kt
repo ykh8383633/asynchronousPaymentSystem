@@ -24,7 +24,7 @@ class OrderService(
         val price = this.calcPrice(orderRequestDto)
 
         if(price != orderRequestDto.amount){
-            throw Exception("AMOUNT IS NOT CORRECT")
+            //throw Exception("AMOUNT IS NOT CORRECT")
         }
 
         val order = Order(
@@ -43,7 +43,8 @@ class OrderService(
             productId = saved.productId,
             userId = saved.userId,
             paymentId = orderRequestDto.paymentId,
-            amount = orderRequestDto.amount
+            amount = orderRequestDto.amount,
+            paymentOrderId = orderRequestDto.pgOrderId
         )
 
         producer.send(requestOrder, message)
