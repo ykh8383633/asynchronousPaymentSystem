@@ -9,7 +9,7 @@ class Order (
     var productId: Long,
     var quantity: Int,
     var status: OrderStatus,
-    var price: Long,
+    var price: Long? = null,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ) {

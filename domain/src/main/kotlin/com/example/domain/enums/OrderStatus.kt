@@ -6,6 +6,7 @@ enum class OrderStatus {
     PAYMENT_WAITING,
     PAYMENT_CANCELED,
     PAYMENT_CONFIRM,
+    PAYMENT_REJECTED,
     CANCELED,
     REJECTED,
     DONE

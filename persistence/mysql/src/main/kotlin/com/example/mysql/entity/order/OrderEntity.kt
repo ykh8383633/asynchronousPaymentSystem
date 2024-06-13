@@ -18,7 +18,7 @@ class OrderEntity(
     var quantity: Int,
     @Enumerated(value = EnumType.STRING)
     var status: OrderStatus,
-    var price: Long,
+    var price: Long? = null,
     var createdDt: Instant? = null,
     var updatedDt: Instant? = null,
 ): DomainEntity<Order, OrderEntity> {

@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/order")
+@RequestMapping("api/v1/order")
 class OrderController(
     private val orderService: OrderService
 ) {
 
     @PostMapping
-    fun order(@RequestBody purchaseRequestDto: OrderRequestDto): ResponseEntity<*>{
-        val order = orderService.order(purchaseRequestDto)
+    fun order(@RequestBody orderRequestDto: OrderRequestDto): ResponseEntity<*>{
+        val order = orderService.order(orderRequestDto)
         return ResponseEntity(order, HttpStatus.OK)
     }
     @GetMapping

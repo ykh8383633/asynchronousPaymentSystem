@@ -12,4 +12,9 @@ class OrderWriter(
         val entity = OrderEntity.of(order)
         return orderRepository.save(entity).toDomain()
     }
+
+    fun update(order: Order): Order{
+        val entity = OrderEntity.of(order)
+        return orderRepository.save(entity).toDomain()
+    }
 }
