@@ -1,8 +1,10 @@
 package com.example.message.kafka.config
 
+import com.example.common.executor.SemaphoreThreadPoolTaskExecutor
 import com.example.message.kafka.config.properties.MessageProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -18,6 +20,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.util.Arrays
+import java.util.concurrent.Semaphore
 
 
 @Configuration
@@ -43,10 +46,10 @@ class ConsumerConfig(
         return DefaultKafkaConsumerFactory(config)
     }
 
-    @Bean
+    @Bean("consumerExecutor")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
-    fun defaultConsumerExecutor(): ThreadPoolTaskExecutor {
-        val executor = ThreadPoolTaskExecutor()
+    fun consumerExecutor(): SemaphoreThreadPoolTaskExecutor {
+        val executor = SemaphoreThreadPoolTaskExecutor(0)
         executor.corePoolSize = 10
         executor.maxPoolSize = 200
         executor.queueCapacity = 250
@@ -58,15 +61,18 @@ class ConsumerConfig(
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
     fun kafkaConsumerContainer(
         beanConsumerFactory: ConsumerFactory<String, Any>,
-        taskExecutor: ThreadPoolTaskExecutor,
+        @Qualifier("consumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
         messageListener: MessageListener<String, Any>
     ): ConcurrentMessageListenerContainer<String, Any> {
+        Semaphore(2).drainPermits()
         val topics = this.properties.consumer?.subscribes?.toTypedArray() ?: arrayOf()
         val containerProps = ContainerProperties(*topics)
         containerProps.listenerTaskExecutor = taskExecutor
         containerProps.messageListener = messageListener
 
-        return ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps)
+        return ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
+            concurrency = 4
+        }
     }
 
 }

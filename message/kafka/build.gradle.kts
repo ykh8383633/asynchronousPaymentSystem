@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":common"))
 
     implementation("org.springframework.kafka:spring-kafka")
 
