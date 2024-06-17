@@ -9,3 +9,4 @@ spring:
       requestOrder: "command-request-order"
       rejectOrder: "event-reject-order"
       confirmOrder: "event-confirm-order"
+      throttlingConsumer: "command-throttling-consumer"

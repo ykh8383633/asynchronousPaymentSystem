@@ -49,4 +49,14 @@ class ResizeableSemaphore(
             release()
         }
     }
+
+    fun <T> submitWithRock(func: () -> T): T {
+        acquire()
+        try{
+            return func()
+        }
+        finally {
+            release()
+        }
+    }
 }

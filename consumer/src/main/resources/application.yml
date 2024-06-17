@@ -27,9 +27,13 @@ spring:
     consumer:
       groupId: 1
       subscribes:
-        - "command-request-order"
-        - "event-reject-order"
-        - "event-confirm-order"
+        topics:
+        broadcastTopics:
+          - "command-throttling-consumer"
+        throttlingTopics:
+          - "command-request-order"
+          - "event-reject-order"
+          - "event-confirm-order"
 
   payment:
     secretKey: "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6"

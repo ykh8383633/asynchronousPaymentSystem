@@ -10,12 +10,19 @@ class MessageProperties(
 ) {
     data class ConsumerProperties(
         val groupId: String?,
-        val subscribes: MutableList<String>
+        val subscribes: SubscribesProperties
+    )
+
+    data class SubscribesProperties(
+        val topics: MutableList<String>,
+        val throttlingTopics: MutableList<String>,
+        val broadcastTopics: MutableList<String>
     )
 
     data class TopicProperties(
         val requestOrder: String,
         val confirmOrder: String,
-        val rejectOrder: String
+        val rejectOrder: String,
+        val throttlingConsumer: String
     )
 }

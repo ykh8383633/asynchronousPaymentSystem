@@ -1,5 +1,6 @@
-package com.example.asynchronousPaymentConsumer.controller
+package com.example.asynchronousPaymentSystem.controller
 
+import com.example.asynchronousPaymentSystem.service.ConsumerConfigureService
 import com.example.common.executor.SemaphoreThreadPoolTaskExecutor
 import com.example.domain.dto.AddPermitsRequestDto
 import com.example.domain.dto.AddPermitsResponseDto
@@ -11,17 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+
 @RestController
 @RequestMapping("api/v1/consumer/configure")
 class ConsumerConfigureController(
-    @Qualifier("ThrottlingHandlerExecutor") private val consumerThreadPoolTaskExecutor: SemaphoreThreadPoolTaskExecutor
+    private val consumerConfigureService: ConsumerConfigureService
 ) {
-
     @PostMapping("/add-permits")
-    fun addPermits(@RequestBody request: AddPermitsRequestDto): ResponseEntity<*>{
-        val permits = consumerThreadPoolTaskExecutor.addPermits(request.permits);
-        return ResponseEntity(AddPermitsResponseDto(permits), HttpStatus.OK)
+    fun addPermits(@RequestBody request: AddPermitsRequestDto): ResponseEntity<Unit> {
+        consumerConfigureService.throttleConsumer(request)
+        return ResponseEntity.noContent().build()
     }
-
-
 }

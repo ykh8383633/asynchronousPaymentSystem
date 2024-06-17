@@ -3,10 +3,12 @@ package com.example.message.kafka.consumer
 import com.example.message.kafka.config.properties.MessageProperties
 import com.example.message.kafka.consumer.handler.MessageHandler
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
-@Component
-class ConsumerImpl(
+@Component("DefaultConsumer")
+@ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
+class DefaultConsumer(
     private val messageProperties: MessageProperties,
     private val handlers: MutableList<MessageHandler>
 ): Consumer {

@@ -13,26 +13,24 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import java.util.Arrays
 import java.util.concurrent.Semaphore
 
 
 @Configuration
 @EnableConfigurationProperties(MessageProperties::class)
-class ConsumerConfig(
+class ThrottlingConsumerConfig(
     private val properties: MessageProperties
 ) {
 
-    @Bean
+    @Bean("ThrottlingConsumerFactory")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
-    fun consumerFactory(): ConsumerFactory<String, Any> {
-        val groupID = properties.consumer?.groupId ?: -1
+    fun throttlingConsumerFactory(): ConsumerFactory<String, Any> {
+        val groupID = properties.consumer?.groupId ?: throw Exception("Group ID can not be null")
         val config = mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to properties.bootstrapServer,
             ConsumerConfig.GROUP_ID_CONFIG to groupID,
@@ -46,26 +44,36 @@ class ConsumerConfig(
         return DefaultKafkaConsumerFactory(config)
     }
 
-    @Bean("consumerExecutor")
+    @Bean("ThrottlingConsumerExecutor")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
-    fun consumerExecutor(): SemaphoreThreadPoolTaskExecutor {
-        val executor = SemaphoreThreadPoolTaskExecutor(0)
+    fun throttlingConsumerExecutor(): ThreadPoolTaskExecutor {
+        val executor = ThreadPoolTaskExecutor()
         executor.corePoolSize = 10
         executor.maxPoolSize = 200
         executor.queueCapacity = 250
-        executor.setThreadFactory(CustomizableThreadFactory("kafka-thread"))
+        executor.setThreadFactory(CustomizableThreadFactory("throttling-consumer-thread"))
         return executor
     }
 
-    @Bean
+    @Bean("ThrottlingHandlerExecutor")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
-    fun kafkaConsumerContainer(
-        beanConsumerFactory: ConsumerFactory<String, Any>,
-        @Qualifier("consumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
-        messageListener: MessageListener<String, Any>
+    fun throttlingHandlerExecutor(): SemaphoreThreadPoolTaskExecutor {
+        val executor = SemaphoreThreadPoolTaskExecutor(1)
+        executor.corePoolSize = 10
+        executor.maxPoolSize = 200
+        executor.queueCapacity = 250
+        executor.setThreadFactory(CustomizableThreadFactory("throttling-handler-thread"))
+        return executor
+    }
+
+    @Bean("ThrottlingConsumerContainer")
+    @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
+    fun throttlingConsumerContainer(
+        @Qualifier("ThrottlingConsumerFactory") beanConsumerFactory: ConsumerFactory<String, Any>,
+        @Qualifier("ThrottlingConsumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
+        @Qualifier("ThrottlingConsumer") messageListener: MessageListener<String, Any>
     ): ConcurrentMessageListenerContainer<String, Any> {
-        Semaphore(2).drainPermits()
-        val topics = this.properties.consumer?.subscribes?.toTypedArray() ?: arrayOf()
+        val topics = this.properties.consumer?.subscribes?.throttlingTopics?.toTypedArray() ?: arrayOf()
         val containerProps = ContainerProperties(*topics)
         containerProps.listenerTaskExecutor = taskExecutor
         containerProps.messageListener = messageListener

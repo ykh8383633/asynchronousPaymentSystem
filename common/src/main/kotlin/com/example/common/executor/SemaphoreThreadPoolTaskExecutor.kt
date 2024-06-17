@@ -2,7 +2,10 @@ package com.example.common.executor
 
 import com.example.common.lock.ResizeableSemaphore
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import java.util.concurrent.Callable
+import java.util.concurrent.Future
 import java.util.concurrent.Semaphore
+import java.util.concurrent.ThreadPoolExecutor
 
 
 class SemaphoreThreadPoolTaskExecutor(
@@ -16,6 +19,14 @@ class SemaphoreThreadPoolTaskExecutor(
 
     override fun execute(task: Runnable) = _semaphore.executeWithRock {
         super.execute(task)
+    }
+
+    override fun <T : Any?> submit(task: Callable<T>): Future<T> = _semaphore.submitWithRock {
+         super.submit(task);
+    }
+
+    override fun submit(task: Runnable): Future<*> = _semaphore.submitWithRock {
+        super.submit(task)
     }
 
     fun addPermits(permits: Int): Int {
