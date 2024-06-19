@@ -26,10 +26,14 @@ import java.util.concurrent.Semaphore
 class BroadcastTopicConsumerConfig(
     private val properties: MessageProperties
 ) {
+    private fun createRandomGroupId(): String {
+        return UUID.randomUUID().toString()
+    }
+
     @Bean("BroadcastTopicConsumerFactory")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
     fun broadcastTopicConsumerFactory(): ConsumerFactory<String, Any> {
-        val groupID = UUID.randomUUID().toString();
+        val groupID = createRandomGroupId(); // random key to broadcast
         val config = mapOf<String, Any>(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to properties.bootstrapServer,
             ConsumerConfig.GROUP_ID_CONFIG to groupID,
@@ -47,9 +51,9 @@ class BroadcastTopicConsumerConfig(
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
     fun broadcastTopicConsumerExecutor(): ThreadPoolTaskExecutor {
         val executor = ThreadPoolTaskExecutor()
-        executor.corePoolSize = 10
-        executor.maxPoolSize = 200
-        executor.queueCapacity = 250
+        executor.corePoolSize = 2
+        executor.maxPoolSize = 10
+        executor.queueCapacity = 25
         executor.setThreadFactory(CustomizableThreadFactory("broadcastTopic-consumer-thread"))
         return executor
     }
@@ -67,7 +71,7 @@ class BroadcastTopicConsumerConfig(
         containerProps.messageListener = messageListener
 
         return ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
-            concurrency = 4
+            concurrency = 2
         }
     }
 }

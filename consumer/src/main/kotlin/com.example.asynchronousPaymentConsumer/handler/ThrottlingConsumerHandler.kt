@@ -15,6 +15,10 @@ class ThrottlingConsumerHandler(
 ): GenericMessageHandlerBase<ThrottlingConsumerMessage>() {
 
     override fun handleMessage(data: ThrottlingConsumerMessage) {
-        throttleExecutor.addPermits(data.permits)
+        val permits = throttleExecutor.addPermits(data.permits)
+        println("currentPermits: $permits")
+    }
+
+    override fun onError(err: Exception) {
     }
 }

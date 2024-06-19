@@ -26,4 +26,7 @@ class RejectPaymentHandler(
         payment.status = PaymentStatus.REJECTED
         paymentService.update(payment)
     }
+
+    override fun onError(err: Exception) {
+    }
 }

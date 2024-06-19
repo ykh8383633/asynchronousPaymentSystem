@@ -41,8 +41,8 @@ class ResizeableSemaphore(
     }
 
     fun executeWithRock(action: () -> Unit){
-        acquire()
         try{
+            acquire()
             action();
         }
         finally {
@@ -51,8 +51,8 @@ class ResizeableSemaphore(
     }
 
     fun <T> submitWithRock(func: () -> T): T {
-        acquire()
         try{
+            acquire()
             return func()
         }
         finally {

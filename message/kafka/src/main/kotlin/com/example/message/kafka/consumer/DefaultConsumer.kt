@@ -4,6 +4,7 @@ import com.example.message.kafka.config.properties.MessageProperties
 import com.example.message.kafka.consumer.handler.MessageHandler
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component("DefaultConsumer")
@@ -21,11 +22,19 @@ class DefaultConsumer(
         }
     }
 
-    override fun onMessage(record: ConsumerRecord<String, Any>) {
-        val topic = record.topic()
-        val value = record.value()
-        val handlers = handlerMap[topic]
-
-        handlers?.forEach { it.handle(value) }
+    override fun onMessage(data: ConsumerRecord<String, Any>, acknowledgment: Acknowledgment?) {
+        val topic = data.topic()
+        val value = data.value()
+        handlerMap[topic]?.forEach {
+            try{
+                it.handle(value)
+            }
+            catch(e: Exception){
+                it.onError(e)
+            }
+            finally {
+                acknowledgment?.acknowledge()
+            }
+        }
     }
 }

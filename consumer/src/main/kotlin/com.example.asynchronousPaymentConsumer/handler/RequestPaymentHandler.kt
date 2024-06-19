@@ -36,10 +36,15 @@ class RequestPaymentHandler(
             return;
         }
 
+        Thread.sleep(2000)
+
         producer.send(
             confirmOrderTopic,
             ConfirmOrderMessage(payment, order, data.paymentKey, data.paymentOrderId, data.amount)
         )
+    }
+
+    override fun onError(err: Exception) {
     }
 
     private fun validateOrder(order: Order, payment: Payment): RejectOrderMessage? {

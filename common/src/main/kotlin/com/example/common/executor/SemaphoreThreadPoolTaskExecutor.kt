@@ -17,17 +17,25 @@ class SemaphoreThreadPoolTaskExecutor(
         _semaphore = ResizeableSemaphore(initialPermits, true)
     }
 
-    override fun execute(task: Runnable) = _semaphore.executeWithRock {
-        super.execute(task)
+    override fun execute(task: Runnable) = super.execute{
+        _semaphore.executeWithRock {
+            task.run()
+        }
     }
 
-    override fun <T : Any?> submit(task: Callable<T>): Future<T> = _semaphore.submitWithRock {
-         super.submit(task);
+    override fun <T : Any?> submit(task: Callable<T>): Future<T> = super.submit<T> {
+        _semaphore.submitWithRock<T> {
+            task.call()
+        }
     }
 
-    override fun submit(task: Runnable): Future<*> = _semaphore.submitWithRock {
-        super.submit(task)
+
+    override fun submit(task: Runnable): Future<*> = super.submit{
+        _semaphore.submitWithRock {
+            task.run()
+        }
     }
+
 
     fun addPermits(permits: Int): Int {
         var next = _semaphore.permits + permits

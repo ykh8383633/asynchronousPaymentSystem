@@ -11,14 +11,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.listener.AcknowledgingMessageListener
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory
-
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import java.util.concurrent.Semaphore
 
 
 @Configuration
@@ -38,7 +37,8 @@ class ThrottlingConsumerConfig(
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
-            JsonDeserializer.TRUSTED_PACKAGES to "*"
+            JsonDeserializer.TRUSTED_PACKAGES to "*",
+            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false
         )
 
         return DefaultKafkaConsumerFactory(config)
@@ -48,9 +48,12 @@ class ThrottlingConsumerConfig(
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
     fun throttlingConsumerExecutor(): ThreadPoolTaskExecutor {
         val executor = ThreadPoolTaskExecutor()
-        executor.corePoolSize = 10
-        executor.maxPoolSize = 200
-        executor.queueCapacity = 250
+        val corePoolSize = Runtime.getRuntime().availableProcessors() * 2
+        val maxPoolSize = corePoolSize * 2
+        val queueCapacity = 50
+        executor.corePoolSize = corePoolSize
+        executor.maxPoolSize = maxPoolSize
+        executor.queueCapacity = queueCapacity
         executor.setThreadFactory(CustomizableThreadFactory("throttling-consumer-thread"))
         return executor
     }
@@ -58,10 +61,14 @@ class ThrottlingConsumerConfig(
     @Bean("ThrottlingHandlerExecutor")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
     fun throttlingHandlerExecutor(): SemaphoreThreadPoolTaskExecutor {
-        val executor = SemaphoreThreadPoolTaskExecutor(1)
-        executor.corePoolSize = 10
-        executor.maxPoolSize = 200
-        executor.queueCapacity = 250
+        val corePoolSize = Runtime.getRuntime().availableProcessors() * 4
+        val maxPoolSize = corePoolSize * 2
+        val queueCapacity = 1000
+
+        val executor = SemaphoreThreadPoolTaskExecutor(maxPoolSize)
+        executor.corePoolSize = corePoolSize
+        executor.maxPoolSize = maxPoolSize
+        executor.queueCapacity = queueCapacity
         executor.setThreadFactory(CustomizableThreadFactory("throttling-handler-thread"))
         return executor
     }
@@ -71,16 +78,20 @@ class ThrottlingConsumerConfig(
     fun throttlingConsumerContainer(
         @Qualifier("ThrottlingConsumerFactory") beanConsumerFactory: ConsumerFactory<String, Any>,
         @Qualifier("ThrottlingConsumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
-        @Qualifier("ThrottlingConsumer") messageListener: MessageListener<String, Any>
+        @Qualifier("ThrottlingConsumer") messageListener: AcknowledgingMessageListener<String, Any>
     ): ConcurrentMessageListenerContainer<String, Any> {
         val topics = this.properties.consumer?.subscribes?.throttlingTopics?.toTypedArray() ?: arrayOf()
         val containerProps = ContainerProperties(*topics)
         containerProps.listenerTaskExecutor = taskExecutor
         containerProps.messageListener = messageListener
+        containerProps.ackMode = ContainerProperties.AckMode.MANUAL
+        containerProps.isAsyncAcks = true
 
-        return ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
-            concurrency = 4
+        val container = ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
+            concurrency = 1
         }
+
+        return container
     }
 
 }
