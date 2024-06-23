@@ -39,15 +39,16 @@ class ConfirmPaymentHandler(
             amount = data.amount.toString()
         )
 
-        Thread.sleep(2000)
-//        httpClient.post(
-//            paymentProperties.confirmPaymentUrl,
-//            dto,
-//            ConfirmPaymentResponseDto::class.java,
-//            createHeader()
-//        ){ status, body ->
-//            producer.send(rejectOrder, RejectOrderMessage(order, payment, OrderRejectedReason.PAYMENT_FAILED))
-//        } ?: return
+        //Thread.sleep(2000)
+        httpClient.post(
+            paymentProperties.confirmPaymentUrl,
+            dto,
+            ConfirmPaymentResponseDto::class.java,
+            createHeader()
+        ){ status, body ->
+            println(body)
+            producer.send(rejectOrder, RejectOrderMessage(order, payment, OrderRejectedReason.PAYMENT_FAILED))
+        } ?: return
 
         order.status = OrderStatus.CONFIRM
         orderService.update(order)

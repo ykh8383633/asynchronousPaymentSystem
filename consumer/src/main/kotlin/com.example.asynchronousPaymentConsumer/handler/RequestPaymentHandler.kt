@@ -36,7 +36,7 @@ class RequestPaymentHandler(
             return;
         }
 
-        Thread.sleep(2000)
+        //Thread.sleep(2000)
 
         producer.send(
             confirmOrderTopic,

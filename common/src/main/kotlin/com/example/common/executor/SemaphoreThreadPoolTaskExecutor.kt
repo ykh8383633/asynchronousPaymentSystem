@@ -30,7 +30,7 @@ class SemaphoreThreadPoolTaskExecutor(
     }
 
 
-    override fun submit(task: Runnable): Future<*> = super.submit{
+    override fun submit(task: Runnable): Future<*> = super.submit {
         _semaphore.submitWithRock {
             task.run()
         }
