@@ -1,13 +1,14 @@
-## 처리율 조절(throttling)이 가능한 Consumer
+# 처리율 조절(throttling)이 가능한 Consumer
 
-### 문제 고민 동기
+## 문제 고민 동기
 - 비동기 결제 시스템을 구현해 보고 Toss Payments의 결제 승인 api를 이용해 test를 해보던 중 `{"code":"TOO_MANY_REQUESTS","message":"요청량이 초과되었습니다. 일정 시간 이후 시도해주세요."}` 라는 응답을 받았다.(토스 페이먼츠의 test용 API)
 > Q. 외부 API 호출, 혹은 DB의 부하 등 처리 성능을 높히는게 불가능 하거나, scale out 이 힘든  상황에는 어떻게 사용자 응답을 늦추지 않고 문제를 해결할 수 있을까? <p/>
 A. Consumer 에서 처리량을 조절해 메세지를 처리하도록 설계하자!
 
-### 처리율 조절이 가능한 Consumer
+## 처리율 조절이 가능한 Consumer
 - message를 polling하여 messageListener 에게 전달하는 `consumer thread pool`과 메세지를 처리하는 `worker thread pool`을 분리
-- `worker thread pool`은 런타임 중에 `permits`값이 조절 가능한 Semphore를 이용해 락을 잡고 실행하도록 `SemaphoreThreadPoolTaskExecutor`를 구현하여 적용
+- 전달된 메세지는 `worker thread pool`에서 multi-thread로 처리 (비동기)
+- `worker thread pool`은 런타임 중에 `permits`값이 조절 가능한 Semaphore를 이용해 락을 잡고 실행하도록 `SemaphoreThreadPoolTaskExecutor`를 구현하여 적용
 
 ResizeableSemaphore.kt (package: common)
 ````kotlin
@@ -77,7 +78,7 @@ class SemaphoreThreadPoolTaskExecutor(
 }
 ````
 
-- SemaphoreThreadPoolTaskExecutor 적용
+### SemaphoreThreadPoolTaskExecutor 적용
 
 ThrottlingConsumerConfig.kt (package: message.kafka)
 ````kotlin
@@ -115,11 +116,10 @@ class ThrottlingConsumerConfig(
     fun throttlingHandlerExecutor(): SemaphoreThreadPoolTaskExecutor {
         val corePoolSize = Runtime.getRuntime().availableProcessors() * 4
         val maxPoolSize = corePoolSize * 2
-        val queueCapacity = 1000
+        val queueCapacity = MAX_POLL_RECORDS - maxPoolSize
 
         // 메세지 처리 threadPoolExecutor는 SemaphoreThreadPoolTaskExecutor 등록
-        // permits 기본값: maxPoolSize
-        val executor = SemaphoreThreadPoolTaskExecutor(maxPoolSize) 
+        val executor = SemaphoreThreadPoolTaskExecutor(initialPermits =  maxPoolSize) 
         executor.corePoolSize = corePoolSize
         executor.maxPoolSize = maxPoolSize
         executor.queueCapacity = queueCapacity
@@ -134,13 +134,13 @@ class ThrottlingConsumerConfig(
         @Qualifier("ThrottlingConsumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
         @Qualifier("ThrottlingConsumer") messageListener: AcknowledgingMessageListener<String, Any>
     ): ConcurrentMessageListenerContainer<String, Any> {
-        // yml 파일에 throttlingTopics로 등록된 topic 들에만 ThrottlingConsumer 적용
+        // yml 파일에 throttlingTopics로 등록된 topic만 ThrottlingConsumer 적용
         val topics = this.properties.consumer?.subscribes?.throttlingTopics?.toTypedArray() ?: arrayOf()
         val containerProps = ContainerProperties(*topics)
         // ...
-        // 메세지 처리 후 수동 commit
-        containerProps.ackMode = ContainerProperties.AckMode.MANUAL
-        // thread pool을 이용해 병렬 non-blocking 시에도 메세지가 모두 처리 되기 전에 다시 polling을 하지 않기 위한 설정
+        // 메세지 처리 후 즉시 수동 commit
+        containerProps.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
+        // thread pool을 이용해 비동기 처리 시에도 메세지가 모두 처리 되기 전에 다시 polling을 하지 않기 위한 설정
         containerProps.isAsyncAcks = true
 
         val container = ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
@@ -173,3 +173,76 @@ class ThrottlingConsumer(
     }
 }
 ````
+
+## runtime 중에 permits 값을 조절하는 endpoint
+- 서비스 중 consumer의 처리율을 늘리거나 줄일 수 있는 endpoint가 필요
+- 요청을 받은 controller는 `command-throttling-consumer` 메세지 발행
+- `command-throttling-consumer` 메세지는 모든 consumer에게 broadcast 되어야 한다.
+- broadcast 되어야 하는 메세지 수신을 위한 consumer 등록
+
+BroadcastTopicConsumerConfig.kt (package: message.kafka)
+````kotlin
+@Configuration
+@EnableConfigurationProperties(MessageProperties::class)
+class BroadcastTopicConsumerConfig(
+    private val properties: MessageProperties
+) {
+    // ...
+    @Bean("BroadcastTopicConsumerFactory")
+    @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
+    fun broadcastTopicConsumerFactory(): ConsumerFactory<String, Any> {
+        // message가 broadcast 되도록 고유한 groupID 설정
+        val groupID = createRandomGroupId(); 
+        //...
+        return DefaultKafkaConsumerFactory(config)
+    }
+
+    // ...
+    
+    @Bean("BroadcastTopicConsumerContainer")
+    @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
+    fun broadcastTopicConsumerContainer(
+        @Qualifier("BroadcastTopicConsumerFactory") beanConsumerFactory: ConsumerFactory<String, Any>,
+        @Qualifier("BroadcastTopicConsumerExecutor") taskExecutor: ThreadPoolTaskExecutor,
+        @Qualifier("DefaultConsumer") messageListener: MessageListener<String, Any>
+    ): ConcurrentMessageListenerContainer<String, Any> {
+        // yml 파일 내 broadcastTopics로 등록된 토픽만 BroadcastConsumer 적용
+        val topics = this.properties.consumer?.subscribes?.broadcastTopics?.toTypedArray() ?: arrayOf()
+        val containerProps = ContainerProperties(*topics)
+        // ...
+        return ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
+            concurrency = CONCURRENCY
+        }
+    }
+}
+````
+ThrottlingConsumerHandler.kt (package: consumer)
+````kotlin
+@Component
+class ThrottlingConsumerHandler(
+    override val topic: ThrottlingConsumerTopic,
+    @Qualifier("ThrottlingHandlerExecutor") private val throttleExecutor: SemaphoreThreadPoolTaskExecutor
+): GenericMessageHandlerBase<ThrottlingConsumerMessage>() {
+
+    override fun handleMessage(data: ThrottlingConsumerMessage) {
+        // "ThrottlingHandlerExecutor" 의 permits를 조절
+        val permits = throttleExecutor.addPermits(data.permits)
+    }
+
+    override fun onError(err: Exception) {
+        // ...
+    }
+}
+````
+
+## 장점과 단점
+#### 장점
+- 메세지 처리를 thread pool을 이용했기 때문에 multi-thread 비동기 방식으로 더 빠르게 처리 가능해 졌다.
+- 서비스의 상황에 따라 처리율을 자유롭게 조절할 수 있게 되었다.
+
+#### 단점
+
+- 여러개의 쓰래드로 동시 처리를 하기 때문에 offset 순서대로 메세지 처리가 완료되지 않음
+
+    - 메세지 처리 중 서버가 다운 된다면, 메세지 처리가 완료 되었지만 어전 offset이 처리되지 않아 commit되지 않은 메세지들이 중복 처리 될 수 있다.
+        - `ackmode = MANUAL_IMMEDIATE`로 설정해 순서가 맞춰진 부분까지는 즉시 commit 하도록 설정.

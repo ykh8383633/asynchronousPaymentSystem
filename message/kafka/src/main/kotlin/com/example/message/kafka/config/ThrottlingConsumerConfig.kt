@@ -25,6 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 class ThrottlingConsumerConfig(
     private val properties: MessageProperties
 ) {
+    private val MAX_POLL_RECORDS: Int = 500
 
     @Bean("ThrottlingConsumerFactory")
     @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
@@ -38,7 +39,8 @@ class ThrottlingConsumerConfig(
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
             JsonDeserializer.TRUSTED_PACKAGES to "*",
-            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false
+            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
+            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to MAX_POLL_RECORDS
         )
 
         return DefaultKafkaConsumerFactory(config)
@@ -63,9 +65,9 @@ class ThrottlingConsumerConfig(
     fun throttlingHandlerExecutor(): SemaphoreThreadPoolTaskExecutor {
         val corePoolSize = Runtime.getRuntime().availableProcessors() * 4
         val maxPoolSize = corePoolSize * 2
-        val queueCapacity = 1000
+        val queueCapacity = MAX_POLL_RECORDS - maxPoolSize
 
-        val executor = SemaphoreThreadPoolTaskExecutor(maxPoolSize)
+        val executor = SemaphoreThreadPoolTaskExecutor(initialPermits =  maxPoolSize)
         executor.corePoolSize = corePoolSize
         executor.maxPoolSize = maxPoolSize
         executor.queueCapacity = queueCapacity
@@ -84,7 +86,7 @@ class ThrottlingConsumerConfig(
         val containerProps = ContainerProperties(*topics)
         containerProps.listenerTaskExecutor = taskExecutor
         containerProps.messageListener = messageListener
-        containerProps.ackMode = ContainerProperties.AckMode.MANUAL
+        containerProps.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         containerProps.isAsyncAcks = true
 
         val container = ConcurrentMessageListenerContainer<String, Any>(beanConsumerFactory, containerProps).apply {
