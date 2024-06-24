@@ -10,7 +10,7 @@ A. Consumer 에서 처리량을 조절해 메세지를 처리하도록 설계하
 - 전달된 메세지는 `worker thread pool`에서 multi-thread로 처리 (비동기)
 - `worker thread pool`은 런타임 중에 `permits`값이 조절 가능한 Semaphore를 이용해 락을 잡고 실행하도록 `SemaphoreThreadPoolTaskExecutor`를 구현하여 적용
 
-ResizeableSemaphore.kt (package: common)
+ResizeableSemaphore.kt (module: common)
 ````kotlin
 class ResizeableSemaphore(
     initialPermits: Int,
@@ -51,7 +51,7 @@ class ResizeableSemaphore(
     }
 }
 ````
-SemaphoreThreadPoolTaskExecutor.kt (package: common)
+SemaphoreThreadPoolTaskExecutor.kt (module: common)
 ````kotlin
 class SemaphoreThreadPoolTaskExecutor(
     initialPermits: Int
@@ -80,7 +80,7 @@ class SemaphoreThreadPoolTaskExecutor(
 
 ### SemaphoreThreadPoolTaskExecutor 적용
 
-ThrottlingConsumerConfig.kt (package: message.kafka)
+ThrottlingConsumerConfig.kt (module: message.kafka)
 ````kotlin
 @Configuration
 @EnableConfigurationProperties(MessageProperties::class)
@@ -152,7 +152,7 @@ class ThrottlingConsumerConfig(
 
 }
 ````
-ThrottlingConsumer.kt (package: message.kafka)
+ThrottlingConsumer.kt (module: message.kafka)
 ````kotlin
 @Component("ThrottlingConsumer")
 @ConditionalOnProperty(prefix = "spring.kafka", name = ["isConsumer"])
@@ -180,7 +180,7 @@ class ThrottlingConsumer(
 - `command-throttling-consumer` 메세지는 모든 consumer에게 broadcast 되어야 한다.
 - broadcast 되어야 하는 메세지 수신을 위한 consumer 등록
 
-BroadcastTopicConsumerConfig.kt (package: message.kafka)
+BroadcastTopicConsumerConfig.kt (module: message.kafka)
 ````kotlin
 @Configuration
 @EnableConfigurationProperties(MessageProperties::class)
@@ -216,7 +216,7 @@ class BroadcastTopicConsumerConfig(
     }
 }
 ````
-ThrottlingConsumerHandler.kt (package: consumer)
+ThrottlingConsumerHandler.kt (module: consumer)
 ````kotlin
 @Component
 class ThrottlingConsumerHandler(
