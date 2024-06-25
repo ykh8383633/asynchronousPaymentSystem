@@ -79,6 +79,9 @@ class SemaphoreThreadPoolTaskExecutor(
 ````
 
 ### SemaphoreThreadPoolTaskExecutor 적용
+> 비동기 메세지 처리 시 consumer 설정 (consumer 정지 시키기) 관련 정리: <p/>
+https://github.com/ykh8383633/study_note/blob/main/kafka/consumer_%EB%B9%84%EB%8F%99%EA%B8%B0%EB%A1%9C_%EB%A9%94%EC%84%B8%EC%A7%80_%EC%B2%98%EB%A6%AC%EC%8B%9C_%EB%AC%B8%EC%A0%9C%EC%A0%90.md
+
 
 ThrottlingConsumerConfig.kt (module: message.kafka)
 ````kotlin
