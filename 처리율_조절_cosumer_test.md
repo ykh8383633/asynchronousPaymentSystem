@@ -33,3 +33,6 @@ const postAsync = async (url, body) => {
         resolve(resp)
     })
 }
+
+permits: 8 (동시에 8개 처리)<p/>
+<img src="https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/c4234ca2-c354-456a-b59a-fff2bd1e8cfe" width="400px">
