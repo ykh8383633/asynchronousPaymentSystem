@@ -42,3 +42,6 @@ permits: 32 (동시에 32개 처리)<p/>
 <img src="https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/a663d14d-297a-49da-b0b7-5ca28e714b86" width="300px"/>
 <img src="https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/c91e9475-53b0-4c5d-ba4f-1b6a4b7d0b0c" width="300px"/>
 
+
+#### 메세지 처리 중간에 permits 값을 조절해 처리량을 조절할 수 있음을 확인
+
