@@ -35,5 +35,5 @@ const postAsync = async (url, body) => {
 }
 
 permits: 8 (동시에 8개 처리)<p/>
-![image](https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/1b31fdc6-8f47-4330-975b-0edb54dafede) {: width="400px"}
+![image](https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/1b31fdc6-8f47-4330-975b-0edb54dafede)
 
