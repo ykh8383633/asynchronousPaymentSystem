@@ -79,7 +79,7 @@ class SemaphoreThreadPoolTaskExecutor(
 ````
 
 ### SemaphoreThreadPoolTaskExecutor 적용
-> 비동기 메세지 처리 시 consumer 설정 (consumer 정지 시키기) 관련 정리: <p/>
+> 이번 프로젝트를 진행하면서 공부한 비동기 메세지 처리 시 consumer 설정 (consumer 정지 시키기) 관련 정리: <p/>
 https://github.com/ykh8383633/study_note/blob/main/kafka/consumer_%EB%B9%84%EB%8F%99%EA%B8%B0%EB%A1%9C_%EB%A9%94%EC%84%B8%EC%A7%80_%EC%B2%98%EB%A6%AC%EC%8B%9C_%EB%AC%B8%EC%A0%9C%EC%A0%90.md
 
 
@@ -245,7 +245,10 @@ class ThrottlingConsumerHandler(
 
 #### 단점
 
-- 여러개의 쓰래드로 동시 처리를 하기 때문에 offset 순서대로 메세지 처리가 완료되지 않음
+- 여러개의 쓰래드로 동시 처리를 하기 때문에 offset 순서대로 메세지 처리가 완료되지 않는다.
 
     - 메세지 처리 중 서버가 다운 된다면, 메세지 처리가 완료 되었지만 어전 offset이 처리되지 않아 commit되지 않은 메세지들이 중복 처리 될 수 있다.
         - `ackmode = MANUAL_IMMEDIATE`로 설정해 순서가 맞춰진 부분까지는 즉시 commit 하도록 설정.
+
+>참고: 서비스 중간에 처리량 조절하기 test (k6 이용)<p/>
+https://github.com/ykh8383633/asynchronousPaymentSystem/blob/main/%EC%B2%98%EB%A6%AC%EC%9C%A8_%EC%A1%B0%EC%A0%88_cosumer_test.md
