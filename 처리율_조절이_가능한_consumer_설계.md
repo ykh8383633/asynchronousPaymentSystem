@@ -40,7 +40,7 @@ class ResizeableSemaphore(
 
     // ...
 
-    fun <T> submitWithRock(func: () -> T): T {
+    fun <T> submitWithLock(func: () -> T): T {
         try{
             acquire()
             return func()
@@ -60,7 +60,7 @@ class SemaphoreThreadPoolTaskExecutor(
     // ... (overrides other methods)
 
     override fun submit(task: Runnable): Future<*> = super.submit {
-        _semaphore.submitWithRock { // 설정된 permits 만큼만 동시 실행
+        _semaphore.submitWithLock { // 설정된 permits 만큼만 동시 실행
             task.run()
         }
     }

@@ -40,7 +40,7 @@ class ResizeableSemaphore(
         }
     }
 
-    fun executeWithRock(action: () -> Unit){
+    fun executeWithLock(action: () -> Unit){
         try{
             acquire()
             action();
@@ -50,7 +50,7 @@ class ResizeableSemaphore(
         }
     }
 
-    fun <T> submitWithRock(func: () -> T): T {
+    fun <T> submitWithLock(func: () -> T): T {
         try{
             acquire()
             return func()

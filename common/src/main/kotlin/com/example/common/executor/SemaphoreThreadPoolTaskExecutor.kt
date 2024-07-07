@@ -18,20 +18,20 @@ class SemaphoreThreadPoolTaskExecutor(
     }
 
     override fun execute(task: Runnable) = super.execute{
-        _semaphore.executeWithRock {
+        _semaphore.executeWithLock {
             task.run()
         }
     }
 
     override fun <T : Any?> submit(task: Callable<T>): Future<T> = super.submit<T> {
-        _semaphore.submitWithRock<T> {
+        _semaphore.submitWithLock<T> {
             task.call()
         }
     }
 
 
     override fun submit(task: Runnable): Future<*> = super.submit {
-        _semaphore.submitWithRock {
+        _semaphore.submitWithLock {
             task.run()
         }
     }
