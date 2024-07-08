@@ -9,6 +9,9 @@ A. Consumer 에서 처리량을 조절해 메세지를 처리하도록 설계하
 - message를 polling하여 messageListener 에게 전달하는 `consumer thread pool`과 메세지를 처리하는 `worker thread pool`을 분리
 - 전달된 메세지는 `worker thread pool`에서 multi-thread로 처리 (비동기)
 - `worker thread pool`은 런타임 중에 `permits`값이 조절 가능한 Semaphore를 이용해 락을 잡고 실행하도록 `SemaphoreThreadPoolTaskExecutor`를 구현하여 적용
+- Overview
+
+![image](https://github.com/ykh8383633/asynchronousPaymentSystem/assets/86603009/b6ea9404-1df1-44b0-99a5-67f6a247e6ff)
 
 ResizeableSemaphore.kt (module: common)
 ````kotlin
