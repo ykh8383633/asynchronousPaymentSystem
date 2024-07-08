@@ -1,4 +1,4 @@
-# 처리율 조절(throttling)이 가능한 Consumer
+# Partition에 상관 없이 처리율 조절(throttling)이 가능한 Consumer
 
 ## 문제 고민 동기
 - 비동기 결제 시스템을 구현해 보고 Toss Payments의 결제 승인 api를 이용해 test를 해보던 중 `{"code":"TOO_MANY_REQUESTS","message":"요청량이 초과되었습니다. 일정 시간 이후 시도해주세요."}` 라는 응답을 받았다.(토스 페이먼츠의 test용 API)
