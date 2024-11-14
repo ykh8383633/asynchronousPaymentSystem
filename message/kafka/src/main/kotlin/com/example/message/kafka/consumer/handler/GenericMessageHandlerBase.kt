@@ -1,6 +1,8 @@
 package com.example.message.kafka.consumer.handler
 
-abstract class GenericMessageHandlerBase<TMessage>: MessageHandler {
+import com.example.domain.model.message.Message
+
+abstract class GenericMessageHandlerBase<TMessage: Message>: MessageHandler {
     override fun handle(data: Any) {
         val typedData = mapRequest(data)
         handleMessage(typedData)

@@ -13,7 +13,7 @@ class DefaultConsumer(
     private val messageProperties: MessageProperties,
     private val handlers: MutableList<MessageHandler>
 ): Consumer {
-    private val handlerMap: MutableMap<String, MutableList<MessageHandler>> = mutableMapOf()
+    protected val handlerMap: MutableMap<String, MutableList<MessageHandler>> = mutableMapOf()
 
     init {
         handlers.forEach{
