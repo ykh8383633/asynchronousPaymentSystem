@@ -3,17 +3,15 @@ package com.example.message.kafka.consumer
 import com.example.common.executor.SemaphoreThreadPoolTaskExecutor
 import com.example.domain.model.message.OrderedMessage
 import com.example.message.kafka.config.properties.MessageProperties
-import com.example.message.kafka.consumer.handler.GenericMessageHandlerBase
 import com.example.message.kafka.consumer.handler.MessageHandler
-import com.example.message.kafka.topic.Topic
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.thread
 
@@ -43,23 +41,23 @@ class ThrottlingConsumer(
     }
 
     inner class OrderedMessageHandler {
-        private val _queue: BlockingQueue<Pair<ConsumerRecord<String, Any>, Acknowledgment?>> = LinkedBlockingQueue()
-        private val _t: Thread
+        private val _queue: BlockingQueue<Pair<ConsumerRecord<String, Any>, Acknowledgment?>>
+        private val _consumer: Thread
+        private val _producer: Executor
+
         init {
-            _t = thread {
+            _queue = LinkedBlockingQueue()
+            _producer = Executors.newSingleThreadExecutor();
+            _consumer = thread {
                 while(true) {
                     val pair = _queue.take()
-                    val ack = pair.second
-                    val record = pair.first
-
-                    super@ThrottlingConsumer.onMessage(record, ack)
+                    super@ThrottlingConsumer.onMessage(pair.first, pair.second)
                 }
             }
         }
 
         fun handle(record: ConsumerRecord<String, Any>, acknowledgment: Acknowledgment?) {
-            _queue.add(Pair(record, acknowledgment))
+            _producer.execute{ _queue.add(Pair(record, acknowledgment)) }
         }
     }
-
 }
